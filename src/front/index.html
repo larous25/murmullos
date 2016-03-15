@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>wellcome to my minichat</title>
+    <style media="screen">
+      button{
+        background: grey;
+        border: none;
+        border-radius: 10px;
+        color: gainsboro;
+        margin: 5px;
+        padding: 3px 5px;
+      }
+
+      div.rooms{
+        clear: both;
+        height: 200px;
+        margin: 0 auto;
+        width: 80%;
+      }
+
+      div.allrooms span.msg{
+        cursor: pointer;
+        padding: 0px 6px;
+      }
+
+      div.allrooms span.msg.active{
+        background: cadetblue;
+      }
+
+      div.allrooms hr{
+        border: 0;
+        border-top: 1px solid grey;
+        display: block;
+        margin: 0.3em 0;
+        padding: 0;
+        height: 1px;
+      }
+
+      div.main{
+        background: aliceblue;
+        height: 100%;
+        width: 70%;
+        float:left;
+        overflow-x:auto;
+      }
+
+      div.main span.msg{
+        background: beige;
+        color:grey;
+      }
+
+      div.main hr{
+        display: block;
+        height: 1px;
+        border: 0;
+        border-top: 1px solid white;
+        margin: 0.3em 0;
+        padding: 0;
+      }
+
+      input[name=newRoom]{
+        box-sizing: content-box;
+        width: 28%;
+        float:right;
+      }
+
+      div.text{
+        width: 80%;
+        margin: 0 auto;
+      }
+
+      textarea[name=message]{
+        width: 100%;
+      }
+
+    </style>
+  </head>
+  <body>
+      <div class="rooms">
+        <div class="main">
+        </div>
+        <input type="text" name="newRoom" placeholder="Name new room">
+        <button id="room">Create room</button>
+        <div class="allrooms">
+          <span class="msg active">default</span>
+          <hr>
+        </div>
+      </div>
+    <div class="text">
+      <textarea name="message" rows="5" cols="40" placeholder="write message">
+
+      </textarea>
+      <button id="send">Send Msg</button>
+    </div>
+
+
+    <script src="https://cdn.socket.io/socket.io-1.2.1.js"></script>
+    <script type="text/javascript">
+
+      var btnSend = document.querySelector('#send');
+      var btnRoom = document.querySelector('#room');
+      var txtMsg  = document.querySelector('[name=message]');
+      var divMain = document.querySelector('div.main');
+      var inpRoom = document.querySelector('[name=newRoom]');
+      var divRoms = document.querySelector('div.allrooms');
+      var room = 'default';
+      var socket = io('ws://localhost:3000/chat');
+
+
+      /* init sockets */
+      socket.on('connect', function () {
+        console.log(socket.io.readyState);
+
+        document
+        .querySelector('div.allrooms span')
+        .addEventListener('click', evenSpan);
+
+        /* rooms */
+        btnRoom.addEventListener('click', function(e){
+          var newRoom = inpRoom.value;
+
+          insertMsg(newRoom, divRoms, 'true');
+
+           socket.emit('newroom', {
+             newRoom: newRoom,
+             room: room
+           });
+        });
+
+        socket.on('newroom', function(msg){
+          console.log('newroom', msg);
+          insertMsg(msg, divRoms, 'true');
+        });
+
+
+        /* main chat */
+        btnSend.addEventListener('click',function(e)  {
+          insertMsg(txtMsg.value, divMain);
+          socket.emit('message', {
+            message : { msg : txtMsg.value },
+            room    : room
+          });
+        });
+
+        socket.on('message', function(data){
+          console.log('message', data);
+          insertMsg(data.msg, divMain);
+        });
+
+
+        /* helpers */
+
+        function insertMsg(msg, div, addEvent){
+          var span       = document.createElement('span');
+          span.innerHTML = msg;
+          span.className = 'msg';
+
+          if(addEvent){
+            span.addEventListener('click', evenSpan);
+          }
+
+          div.appendChild(span);
+          div.appendChild(document.createElement('hr'));
+        }
+
+        function evenSpan(e){
+          var element = e.target;
+          var before  = room;
+          room        = element.innerHTML;
+
+
+          var active          = document.querySelector('div.allrooms span.active');
+          active.className    = active.className.replace(/active/, '');
+          element.className  += ' active';
+
+          socket.emit('changeRoom', {
+            before : before,
+            room   : room
+          });
+        }
+     });
+    </script>
+  </body>
+</html>

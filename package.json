@@ -1,0 +1,8 @@
+{
+  "name": "murmullos",
+  "version": "1.0.0",
+  "description": "use engine.io for example mini chat",
+  "main": "index.js",
+  "author": "brian bustos <larous25@hotmail.es>",
+  "license": "ISC"
+}
