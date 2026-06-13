@@ -1,186 +1,350 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>wellcome to my minichat</title>
-    <style media="screen">
-      button{
-        background: grey;
-        border: none;
-        border-radius: 10px;
-        color: gainsboro;
-        margin: 5px;
-        padding: 3px 5px;
-      }
+<html lang="es">
 
-      div.rooms{
-        clear: both;
-        height: 200px;
-        margin: 0 auto;
-        width: 80%;
-      }
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0">
+  <title>Welcome to my Minichat</title>
+  <style>
+    :root {
+      --bg-color: #f4f7f6;
+      --chat-bg: #ffffff;
+      --primary: #5f9ea0;
+      --text-main: #333333;
+      --border-radius: 8px;
+    }
 
-      div.allrooms span.msg{
-        cursor: pointer;
-        padding: 0px 6px;
-      }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
-      div.allrooms span.msg.active{
-        background: cadetblue;
-      }
+    div.rooms {
+      display: flex;
+      gap: 15px;
+      height: 350px;
+      width: 100%;
+      max-width: 800px;
+      margin-bottom: 15px;
+    }
 
-      div.allrooms hr{
-        border: 0;
-        border-top: 1px solid grey;
-        display: block;
-        margin: 0.3em 0;
-        padding: 0;
-        height: 1px;
-      }
+    /* Área de Mensajes Principal */
+    div.main {
+      background: var(--chat-bg);
+      flex: 7;
+      overflow-y: auto;
+      padding: 15px;
+      border-radius: var(--border-radius);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e0e0e0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
 
-      div.main{
-        background: aliceblue;
-        height: 100%;
-        width: 70%;
-        float:left;
-        overflow-x:auto;
-      }
+    div.main span.msg {
+      background: #f0f4f8;
+      padding: 8px 12px;
+      border-radius: var(--border-radius);
+      color: var(--text-main);
+      word-break: break-word;
+    }
 
-      div.main span.msg{
-        background: beige;
-        color:grey;
-      }
+    /* Panel Lateral (Salas / Tabs) */
+    div.sidebar {
+      flex: 3;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
 
-      div.main hr{
-        display: block;
-        height: 1px;
-        border: 0;
-        border-top: 1px solid white;
-        margin: 0.3em 0;
-        padding: 0;
-      }
+    .room-controls {
+      display: flex;
+      gap: 5px;
+    }
 
-      input[name=newRoom]{
-        box-sizing: content-box;
-        width: 28%;
-        float:right;
-      }
+    div.allrooms {
+      background: var(--chat-bg);
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 10px;
+      border-radius: var(--border-radius);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e0e0e0;
+    }
 
-      div.text{
-        width: 80%;
-        margin: 0 auto;
-      }
+    div.allrooms span.msg {
+      display: block;
+      cursor: pointer;
+      padding: 8px 10px;
+      border-radius: 4px;
+      margin-bottom: 5px;
+      transition: background 0.2s ease;
+    }
 
-      textarea[name=message]{
-        width: 100%;
-      }
+    div.allrooms span.msg:hover {
+      background: #e9ecef;
+    }
 
-    </style>
-  </head>
-  <body>
-      <div class="rooms">
-        <div class="main">
-        </div>
-        <input type="text" name="newRoom" placeholder="Name new room">
-        <button id="room">Create room</button>
-        <div class="allrooms">
-          <span class="msg active">default</span>
-          <hr>
-        </div>
+    div.allrooms span.msg.active {
+      background: var(--primary);
+      color: white;
+      font-weight: bold;
+    }
+
+    /* Controles de Texto Inferiores */
+    div.text {
+      width: 100%;
+      max-width: 800px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    textarea[name=message] {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px;
+      border-radius: var(--border-radius);
+      border: 1px solid #ccc;
+      resize: vertical;
+      font-family: inherit;
+    }
+
+    input[type=text] {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    button {
+      background: var(--primary);
+      border: none;
+      border-radius: 4px;
+      color: white;
+      cursor: pointer;
+      padding: 8px 12px;
+      font-weight: bold;
+      transition: background 0.2s ease, opacity 0.2s;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    button#send {
+      align-self: flex-end;
+      padding: 10px 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="rooms">
+    <div class="main"
+      id="chat-container"></div>
+
+    <div class="sidebar">
+      <div class="room-controls">
+        <input type="text"
+          name="newRoom"
+          placeholder="Name new room">
+        <button id="room">Create</button>
       </div>
-    <div class="text">
-      <textarea name="message" rows="5" cols="40" placeholder="write message">
-
-      </textarea>
-      <button id="send">Send Msg</button>
+      <div class="allrooms"
+        id="rooms-container">
+        <span class="msg active">default</span>
+      </div>
     </div>
+  </div>
 
+  <div class="text">
+    <textarea name="message"
+      rows="4"
+      placeholder="Write a message..."></textarea>
+    <button id="send">Send Msg</button>
+  </div>
 
-    <script src="https://cdn.socket.io/socket.io-1.2.1.js"></script>
-    <script type="text/javascript">
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+  <script type="text/javascript">
+    const btnSend = document.querySelector('#send');
+    const btnRoom = document.querySelector('#room');
+    const txtMsg = document.querySelector('[name=message]');
+    const divMain = document.querySelector('#chat-container');
+    const inpRoom = document.querySelector('[name=newRoom]');
+    const divRooms = document.querySelector('#rooms-container');
 
-      var btnSend = document.querySelector('#send');
-      var btnRoom = document.querySelector('#room');
-      var txtMsg  = document.querySelector('[name=message]');
-      var divMain = document.querySelector('div.main');
-      var inpRoom = document.querySelector('[name=newRoom]');
-      var divRoms = document.querySelector('div.allrooms');
-      var room = 'default';
-      var socket = io('ws://localhost:3000/chat');
+    // ESTADO DE LA APLICACIÓN
+    let currentRoom = 'default';
 
+    // Objeto que guardará el historial de mensajes por cada sala
+    const chatHistory = {
+      'default': []
+    };
 
-      /* init sockets */
-      socket.on('connect', function () {
-        console.log(socket.io.readyState);
+    const socket = io('/chat');
 
-        document
-        .querySelector('div.allrooms span')
-        .addEventListener('click', evenSpan);
+    socket.on('connect', () => {
+      console.log('Connected:', socket.id);
 
-        /* rooms */
-        btnRoom.addEventListener('click', function(e){
-          var newRoom = inpRoom.value;
+      // Evento para el cuarto por defecto
+      document.querySelector('div.allrooms span').addEventListener('click', onRoomClick);
 
-          insertMsg(newRoom, divRoms, 'true');
+      // Crear nueva sala
+      btnRoom?.addEventListener('click', () => {
+        const newRoom = inpRoom.value.trim();
+        if (!newRoom) return;
 
-           socket.emit('newroom', {
-             newRoom: newRoom,
-             room: room
-           });
-        });
+        createRoomTab(newRoom);
 
-        socket.on('newroom', function(msg){
-          console.log('newroom', msg);
-          insertMsg(msg, divRoms, 'true');
-        });
+        socket.emit('newroom', { newRoom, room: currentRoom });
+        inpRoom.value = '';
+      });
 
+      // Recibir nueva sala de otro usuario
+      socket.on('newroom', (newRoom) => {
+        createRoomTab(newRoom);
+      });
 
-        /* main chat */
-        btnSend.addEventListener('click',function(e)  {
-          insertMsg(txtMsg.value, divMain);
-          socket.emit('message', {
-            message : { msg : txtMsg.value },
-            room    : room
-          });
-        });
+      // Enviar mensaje
+      btnSend?.addEventListener('click', sendMessage);
+      txtMsg?.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' && !event.shiftKey) {
+          event.preventDefault();
+          sendMessage();
+        }
+      });
 
-        socket.on('message', function(data){
-          console.log('message', data);
-          insertMsg(data.msg, divMain);
-        });
+      // Recibir mensaje
+      socket.on('message', (data) => {
+        // Si el servidor envía la sala a la que pertenece el mensaje, la usamos. 
+        // Si no, asumimos que llegó a la sala en la que estamos actualmente.
+        const targetRoom = data.room || currentRoom;
+        saveAndRenderMessage(data.msg, targetRoom);
+      });
 
+      socket.on('history', (data) => {
+        const { room, messages } = data;
 
-        /* helpers */
-
-        function insertMsg(msg, div, addEvent){
-          var span       = document.createElement('span');
-          span.innerHTML = msg;
-          span.className = 'msg';
-
-          if(addEvent){
-            span.addEventListener('click', evenSpan);
-          }
-
-          div.appendChild(span);
-          div.appendChild(document.createElement('hr'));
+        // Aseguramos que el cliente tenga la sala creada en su historial local
+        if (!chatHistory[room]) {
+          chatHistory[room] = [];
         }
 
-        function evenSpan(e){
-          var element = e.target;
-          var before  = room;
-          room        = element.innerHTML;
+        // Reemplazamos el historial local con el del servidor
+        chatHistory[room] = messages.map(m => m.msg);
 
-
-          var active          = document.querySelector('div.allrooms span.active');
-          active.className    = active.className.replace(/active/, '');
-          element.className  += ' active';
-
-          socket.emit('changeRoom', {
-            before : before,
-            room   : room
-          });
+        // Si la sala que recibimos es la que estamos viendo actualmente, la repintamos
+        if (room === currentRoom) {
+          divMain.innerHTML = '';
+          chatHistory[room].forEach(msg => renderSingleMessage(msg));
         }
-     });
-    </script>
-  </body>
+      });
+    });
+
+    // --- FUNCIONES PRINCIPALES ---
+
+    function sendMessage() {
+      const message = txtMsg.value.trim();
+      if (!message) return;
+
+      // Guardamos el mensaje localmente y lo mostramos
+      saveAndRenderMessage(message, currentRoom);
+
+      // Lo enviamos al servidor
+      socket.emit('message', {
+        message: { msg: message },
+        room: currentRoom
+      });
+
+      txtMsg.value = '';
+    }
+
+    // Guarda el mensaje en el historial y lo dibuja solo si estamos en esa sala
+    function saveAndRenderMessage(msg, roomName) {
+      // Si la sala no existe en el historial, la creamos
+      if (!chatHistory[roomName]) {
+        chatHistory[roomName] = [];
+      }
+
+      // Guardamos el mensaje
+      chatHistory[roomName].push(msg);
+
+      // Si la sala a la que llegó el mensaje es la que estamos viendo, lo dibujamos
+      if (roomName === currentRoom) {
+        renderSingleMessage(msg);
+      }
+    }
+
+    // Dibuja un solo mensaje en el DOM
+    function renderSingleMessage(msg) {
+      const span = document.createElement('span');
+      span.textContent = msg;
+      span.classList.add('msg');
+      divMain.appendChild(span);
+      divMain.scrollTop = divMain.scrollHeight; // Auto-scroll
+    }
+
+    // Cambiar de pestaña (sala)
+    function onRoomClick(event) {
+      const element = event.target;
+      if (!(element instanceof HTMLElement)) return;
+
+      const selectedRoom = element.textContent;
+
+      // Si hacemos clic en la sala en la que ya estamos, no hacemos nada
+      if (currentRoom === selectedRoom) return;
+
+      const before = currentRoom;
+      currentRoom = selectedRoom;
+
+      // 1. Actualizar las clases visuales de los tabs
+      const active = document.querySelector('div.allrooms span.active');
+      active?.classList.remove('active');
+      element.classList.add('active');
+
+      // 2. Limpiar el chat principal y cargar el historial de la nueva sala seleccionada
+      divMain.innerHTML = '';
+      const messagesToLoad = chatHistory[currentRoom] || [];
+      messagesToLoad.forEach(msg => {
+        renderSingleMessage(msg);
+      });
+
+      // 3. Informar al servidor del cambio
+      socket.emit('changeRoom', {
+        before,
+        room: currentRoom
+      });
+    }
+
+    // Crea visualmente la pestaña de una nueva sala
+    function createRoomTab(roomName) {
+      // Evita duplicados si la sala ya existe visualmente
+      const exists = Array.from(divRooms.children).some(el => el.textContent === roomName);
+      if (exists) return;
+
+      // Inicia el historial vacío para esta sala si no existía
+      if (!chatHistory[roomName]) {
+        chatHistory[roomName] = [];
+      }
+
+      const span = document.createElement('span');
+      span.textContent = roomName;
+      span.classList.add('msg');
+      span.addEventListener('click', onRoomClick);
+
+      divRooms.appendChild(span);
+    }
+  </script>
+</body>
+
 </html>
