@@ -1,0 +1,239 @@
+:root {
+    --bg-color: #f4f7f6;
+    --chat-bg: #ffffff;
+    --primary: #5f9ea0;
+    --text-main: #333333;
+    --border-radius: 8px;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.chats {
+    display: flex;
+    gap: 15px;
+    width: 100%;
+    max-width: 800px;    
+    flex-direction: column;
+    align-items: center;
+}
+
+div.rooms {
+    display: flex;
+    gap: 15px;
+    height: 350px;
+    width: 100%;
+    max-width: 800px;
+    margin-bottom: 15px;
+}
+
+/* Área de Mensajes Principal */
+div.main {
+    background: var(--chat-bg);
+    flex: 7;
+    overflow-y: auto;
+    padding: 15px;
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+div.main span.msg {
+    background: #f0f4f8;
+    padding: 8px 12px;
+    border-radius: var(--border-radius);
+    color: var(--text-main);
+    word-break: break-word;
+}
+
+/* Panel Lateral (Salas / Tabs) */
+div.sidebar {
+    flex: 3;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.room-controls {
+    display: flex;
+    gap: 5px;
+}
+
+div.allrooms {
+    background: var(--chat-bg);
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 10px;
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e0e0e0;
+}
+
+div.allrooms span.msg {
+    display: block;
+    cursor: pointer;
+    padding: 8px 10px;
+    border-radius: 4px;
+    margin-bottom: 5px;
+    transition: background 0.2s ease;
+}
+
+div.allrooms span.msg:hover {
+    background: #e9ecef;
+}
+
+div.allrooms span.msg.active {
+    background: var(--primary);
+    color: white;
+    font-weight: bold;
+}
+
+/* Controles de Texto Inferiores */
+div.text {
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+textarea[name=message] {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+    border-radius: var(--border-radius);
+    border: 1px solid #ccc;
+    resize: vertical;
+    font-family: inherit;
+}
+
+input[type=text] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+button {
+    background: var(--primary);
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    padding: 8px 12px;
+    font-weight: bold;
+    transition: background 0.2s ease, opacity 0.2s;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+button#send {
+    align-self: flex-end;
+    padding: 10px 20px;
+}
+
+.userInformation {
+  transition: all .4s ease;
+  overflow: hidden;
+}
+
+.userInformation {
+    width: 100%;
+    max-width: 800px;
+    height: 60vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+
+    margin: auto;
+
+    transition: all .4s ease;
+}
+
+.userInformation input {
+    width: 250px;
+    padding: 10px;
+
+    border: 1px solid #ccc;
+    border-radius: var(--border-radius);
+
+    font-family: inherit;
+    outline: none;
+}
+
+.userInformation input:focus {
+    border-color: var(--primary);
+}
+
+button {
+    background: var(--primary);
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    padding: 8px 12px;
+    font-weight: bold;
+    transition: background 0.2s ease, opacity 0.2s;
+}
+
+#begining {
+    padding: 10px 18px;
+    border-radius: var(--border-radius);
+}
+
+.userInformation.hide {
+  opacity: 0;
+  transform: translateY(-20px);
+  max-height: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.hide {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+/* --- Añadir esto a su archivo CSS existente --- */
+
+/* Estilo para el contenedor .text cuando se está arrastrando un archivo encima */
+.chats .text.dragover textarea {
+    border: 2px dashed #4CAF50 !important; /* Borde verde discontinuo */
+    background-color: #e8f5e9; /* Fondo verde muy claro */
+}
+
+/* Estilo para el contenedor .text cuando se está subiendo un archivo */
+.chats .text.loading {
+    position: relative;
+    opacity: 0.6; /* Hace la zona un poco transparente */
+    pointer-events: none; /* Evita que el usuario haga clic o escriba */
+}
+
+/* Opcional: Añadir un texto de "Cargando..." superpuesto */
+.chats .text.loading::after {
+    content: "⏳ Subiendo archivo...";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: bold;
+    color: #333;
+    z-index: 10;
+}

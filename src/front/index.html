@@ -6,333 +6,335 @@
   <meta name="viewport"
     content="width=device-width, initial-scale=1.0">
   <title>Welcome to my Minichat</title>
-  <style>
-    :root {
-      --bg-color: #f4f7f6;
-      --chat-bg: #ffffff;
-      --primary: #5f9ea0;
-      --text-main: #333333;
-      --border-radius: 8px;
-    }
 
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-main);
-      margin: 0;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+  <link rel="stylesheet"
+    href="/css/main.css">
 
-    div.rooms {
-      display: flex;
-      gap: 15px;
-      height: 350px;
-      width: 100%;
-      max-width: 800px;
-      margin-bottom: 15px;
-    }
-
-    /* Área de Mensajes Principal */
-    div.main {
-      background: var(--chat-bg);
-      flex: 7;
-      overflow-y: auto;
-      padding: 15px;
-      border-radius: var(--border-radius);
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-      border: 1px solid #e0e0e0;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    div.main span.msg {
-      background: #f0f4f8;
-      padding: 8px 12px;
-      border-radius: var(--border-radius);
-      color: var(--text-main);
-      word-break: break-word;
-    }
-
-    /* Panel Lateral (Salas / Tabs) */
-    div.sidebar {
-      flex: 3;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .room-controls {
-      display: flex;
-      gap: 5px;
-    }
-
-    div.allrooms {
-      background: var(--chat-bg);
-      flex-grow: 1;
-      overflow-y: auto;
-      padding: 10px;
-      border-radius: var(--border-radius);
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-      border: 1px solid #e0e0e0;
-    }
-
-    div.allrooms span.msg {
-      display: block;
-      cursor: pointer;
-      padding: 8px 10px;
-      border-radius: 4px;
-      margin-bottom: 5px;
-      transition: background 0.2s ease;
-    }
-
-    div.allrooms span.msg:hover {
-      background: #e9ecef;
-    }
-
-    div.allrooms span.msg.active {
-      background: var(--primary);
-      color: white;
-      font-weight: bold;
-    }
-
-    /* Controles de Texto Inferiores */
-    div.text {
-      width: 100%;
-      max-width: 800px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    textarea[name=message] {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 10px;
-      border-radius: var(--border-radius);
-      border: 1px solid #ccc;
-      resize: vertical;
-      font-family: inherit;
-    }
-
-    input[type=text] {
-      width: 100%;
-      padding: 8px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      box-sizing: border-box;
-    }
-
-    button {
-      background: var(--primary);
-      border: none;
-      border-radius: 4px;
-      color: white;
-      cursor: pointer;
-      padding: 8px 12px;
-      font-weight: bold;
-      transition: background 0.2s ease, opacity 0.2s;
-    }
-
-    button:hover {
-      opacity: 0.9;
-    }
-
-    button#send {
-      align-self: flex-end;
-      padding: 10px 20px;
-    }
-  </style>
 </head>
 
 <body>
-  <div class="rooms">
-    <div class="main"
-      id="chat-container"></div>
+  <div class="userInformation">
+    <input type="text"
+      id="userName">
+    <button class="btn"
+      id="begining">Comenzar</button>
+  </div>
+  <div class="chats hide">
+    <div class="rooms">
+      <div class="main"
+        id="chat-container"></div>
 
-    <div class="sidebar">
-      <div class="room-controls">
-        <input type="text"
-          name="newRoom"
-          placeholder="Name new room">
-        <button id="room">Create</button>
+      <div class="sidebar">
+        <div class="room-controls">
+          <input type="text"
+            name="newRoom"
+            placeholder="Name new room">
+          <button id="room">Create</button>
+        </div>
+        <div class="allrooms"
+          id="rooms-container">
+          <span class="msg active">default</span>
+        </div>
       </div>
-      <div class="allrooms"
-        id="rooms-container">
-        <span class="msg active">default</span>
-      </div>
+    </div>
+
+    <div class="text">
+      <textarea name="message"
+        rows="4"
+        placeholder="Write a message..."></textarea>
+      <button id="send">Send Msg</button>
     </div>
   </div>
 
-  <div class="text">
-    <textarea name="message"
-      rows="4"
-      placeholder="Write a message..."></textarea>
-    <button id="send">Send Msg</button>
-  </div>
-
   <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
-  <script type="text/javascript">
+
+  <script>
+    const btnBeging = document.querySelector('#begining');
+    const divChats = document.querySelector('.chats');
     const btnSend = document.querySelector('#send');
     const btnRoom = document.querySelector('#room');
     const txtMsg = document.querySelector('[name=message]');
     const divMain = document.querySelector('#chat-container');
     const inpRoom = document.querySelector('[name=newRoom]');
     const divRooms = document.querySelector('#rooms-container');
+    const userInformation = document.querySelector('.userInformation');
+    const inputUserName = document.querySelector('#userName');
+    let attachedFile = null;
 
-    // ESTADO DE LA APLICACIÓN
+    let userName = '';
     let currentRoom = 'default';
 
-    // Objeto que guardará el historial de mensajes por cada sala
     const chatHistory = {
-      'default': []
+      default: []
     };
 
     const socket = io('/chat');
 
+    // Contenedor principal de la zona de texto (necesario para las clases CSS de carga)
+    const containerText = document.querySelector('.chats .text');
+
+    // ==========================================
+    // GESTIÓN DE ARRASTRAR Y SOLTAR ARCHIVOS
+    // ==========================================
+    txtMsg.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      containerText.classList.add('dragover');
+    });
+
+    txtMsg.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      containerText.classList.remove('dragover');
+    });
+
+    txtMsg.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      containerText.classList.remove('dragover');
+
+      const file = e.dataTransfer?.files?.[0];
+      if (!file) return;
+
+      // Activar estado visual de carga
+      containerText.classList.add('loading');
+      const originalPlaceholder = txtMsg.placeholder;
+      txtMsg.value = '';
+      txtMsg.placeholder = 'Subiendo archivo... por favor espere.';
+
+      try {
+        const uploaded = await uploadFile(file);
+
+        // Emitir el mensaje de tipo archivo con su estructura correspondiente
+        socket.emit('message', {
+          room: currentRoom,
+          message: {
+            type: 'file',
+            userName,
+            fileName: uploaded.originalname,
+            url: uploaded.url
+          }
+        });
+
+        // Auto-renderizar para el propio emisor de manera local
+        saveAndRenderMessage({
+          userName,
+          type: 'file',
+          fileName: uploaded.originalname,
+          url: uploaded.url
+        }, currentRoom);
+
+      } catch (error) {
+        console.error('Error al subir el archivo:', error);
+        alert('Hubo un error al subir el archivo.');
+      } finally {
+        // Desactivar estado de carga sin importar si falló o tuvo éxito
+        containerText.classList.remove('loading');
+        txtMsg.placeholder = originalPlaceholder;
+      }
+    });
+
+    // UI transición login
+    userInformation.style.transition = 'all .4s ease';
+
+    // =========================
+    // LOGIN
+    // =========================
+    btnBeging.addEventListener('click', () => {
+      userName = inputUserName.value.trim();
+
+      if (!userName) {
+        alert('Ingrese un nombre de usuario');
+        return;
+      }
+
+      socket.emit('join', {
+        room: 'default',
+        userName
+      });
+
+      divChats.classList.remove('hide');
+
+      userInformation.style.opacity = '0';
+      userInformation.style.transform = 'translateY(-20px)';
+      userInformation.style.maxHeight = '0';
+      userInformation.style.padding = '0';
+      userInformation.style.margin = '0';
+
+      setTimeout(() => {
+        userInformation.style.display = 'none';
+      }, 400);
+    });
+
+    // =========================
+    // SOCKET EVENTS
+    // =========================
     socket.on('connect', () => {
       console.log('Connected:', socket.id);
 
-      // Evento para el cuarto por defecto
-      document.querySelector('div.allrooms span').addEventListener('click', onRoomClick);
+      document
+        .querySelector('div.allrooms span')
+        .addEventListener('click', onRoomClick);
 
-      // Crear nueva sala
-      btnRoom?.addEventListener('click', () => {
+      btnRoom.addEventListener('click', () => {
         const newRoom = inpRoom.value.trim();
         if (!newRoom) return;
 
         createRoomTab(newRoom);
 
-        socket.emit('newroom', { newRoom, room: currentRoom });
+        socket.emit('newroom', {
+          newRoom,
+          room: currentRoom
+        });
+
         inpRoom.value = '';
       });
 
-      // Recibir nueva sala de otro usuario
       socket.on('newroom', (newRoom) => {
         createRoomTab(newRoom);
       });
 
-      // Enviar mensaje
-      btnSend?.addEventListener('click', sendMessage);
-      txtMsg?.addEventListener('keydown', (event) => {
+      btnSend.addEventListener('click', sendMessage);
+
+      txtMsg.addEventListener('keydown', (event) => {
         if (event.key === 'Enter' && !event.shiftKey) {
           event.preventDefault();
           sendMessage();
         }
       });
 
-      // Recibir mensaje
       socket.on('message', (data) => {
-        // Si el servidor envía la sala a la que pertenece el mensaje, la usamos. 
-        // Si no, asumimos que llegó a la sala en la que estamos actualmente.
-        const targetRoom = data.room || currentRoom;
-        saveAndRenderMessage(data.msg, targetRoom);
+        const room = data.room ?? currentRoom;
+
+        // Se extraen todas las propiedades de manera segura (tanto texto como archivos)
+        const message = {
+          userName: data.userName ?? 'system',
+          type: data.type ?? 'text',
+          msg: data.msg,
+          fileName: data.fileName,
+          url: data.url
+        };
+
+        saveAndRenderMessage(message, room);
       });
 
       socket.on('history', (data) => {
         const { room, messages } = data;
 
-        // Aseguramos que el cliente tenga la sala creada en su historial local
-        if (!chatHistory[room]) {
-          chatHistory[room] = [];
-        }
+        chatHistory[room] = messages;
 
-        // Reemplazamos el historial local con el del servidor
-        chatHistory[room] = messages.map(m => m.msg);
-
-        // Si la sala que recibimos es la que estamos viendo actualmente, la repintamos
         if (room === currentRoom) {
           divMain.innerHTML = '';
-          chatHistory[room].forEach(msg => renderSingleMessage(msg));
+          messages.forEach(renderSingleMessage);
         }
       });
     });
 
-    // --- FUNCIONES PRINCIPALES ---
-
+    // =========================
+    // SEND MESSAGE
+    // =========================
     function sendMessage() {
       const message = txtMsg.value.trim();
       if (!message) return;
 
-      // Guardamos el mensaje localmente y lo mostramos
-      saveAndRenderMessage(message, currentRoom);
+      const messagePayload = {
+        type: 'text',
+        userName,
+        msg: message
+      };
 
-      // Lo enviamos al servidor
       socket.emit('message', {
-        message: { msg: message },
-        room: currentRoom
+        room: currentRoom,
+        message: messagePayload
       });
+
+      // Renderizar localmente para el emisor
+      saveAndRenderMessage(messagePayload, currentRoom);
 
       txtMsg.value = '';
     }
 
-    // Guarda el mensaje en el historial y lo dibuja solo si estamos en esa sala
-    function saveAndRenderMessage(msg, roomName) {
-      // Si la sala no existe en el historial, la creamos
+    // =========================
+    // SAVE + RENDER
+    // =========================
+    function saveAndRenderMessage(message, roomName) {
       if (!chatHistory[roomName]) {
         chatHistory[roomName] = [];
       }
 
-      // Guardamos el mensaje
-      chatHistory[roomName].push(msg);
+      // Evitar duplicar mensajes si ya se guardó localmente
+      const yaExiste = chatHistory[roomName].some(m =>
+        m.userName === message.userName &&
+        m.msg === message.msg &&
+        m.url === message.url
+      );
 
-      // Si la sala a la que llegó el mensaje es la que estamos viendo, lo dibujamos
+      if (!yaExiste) {
+        chatHistory[roomName].push(message);
+      }
+
       if (roomName === currentRoom) {
-        renderSingleMessage(msg);
+        renderSingleMessage(message);
       }
     }
 
-    // Dibuja un solo mensaje en el DOM
-    function renderSingleMessage(msg) {
-      const span = document.createElement('span');
-      span.textContent = msg;
-      span.classList.add('msg');
-      divMain.appendChild(span);
-      divMain.scrollTop = divMain.scrollHeight; // Auto-scroll
+    function renderSingleMessage(message) {
+      const container = document.createElement('div');
+      container.classList.add('msg');
+
+      let contentHtml = '';
+      if (message.type === 'file') {
+        contentHtml = `<a href="${message.url}" target="_blank" class="file-link">📎 Descargar: ${message.fileName}</a>`;
+      } else {
+        contentHtml = message.msg || '';
+      }
+
+      container.innerHTML = `
+    <strong>${message.userName}</strong><br>
+    ${contentHtml}
+  `;
+
+      divMain.appendChild(container);
+      divMain.scrollTop = divMain.scrollHeight;
     }
 
-    // Cambiar de pestaña (sala)
+    // =========================
+    // ROOMS
+    // =========================
     function onRoomClick(event) {
       const element = event.target;
       if (!(element instanceof HTMLElement)) return;
 
       const selectedRoom = element.textContent;
-
-      // Si hacemos clic en la sala en la que ya estamos, no hacemos nada
       if (currentRoom === selectedRoom) return;
 
       const before = currentRoom;
       currentRoom = selectedRoom;
 
-      // 1. Actualizar las clases visuales de los tabs
-      const active = document.querySelector('div.allrooms span.active');
-      active?.classList.remove('active');
+      document
+        .querySelector('div.allrooms span.active')
+        .classList.remove('active');
+
       element.classList.add('active');
 
-      // 2. Limpiar el chat principal y cargar el historial de la nueva sala seleccionada
       divMain.innerHTML = '';
-      const messagesToLoad = chatHistory[currentRoom] || [];
-      messagesToLoad.forEach(msg => {
-        renderSingleMessage(msg);
-      });
 
-      // 3. Informar al servidor del cambio
+      const messages = chatHistory[currentRoom] || [];
+      messages.forEach(renderSingleMessage);
+
       socket.emit('changeRoom', {
         before,
         room: currentRoom
       });
     }
 
-    // Crea visualmente la pestaña de una nueva sala
     function createRoomTab(roomName) {
-      // Evita duplicados si la sala ya existe visualmente
-      const exists = Array.from(divRooms.children).some(el => el.textContent === roomName);
+      const exists = Array.from(divRooms.children)
+        .some(el => el.textContent === roomName);
+
       if (exists) return;
 
-      // Inicia el historial vacío para esta sala si no existía
       if (!chatHistory[roomName]) {
         chatHistory[roomName] = [];
       }
@@ -344,7 +346,24 @@
 
       divRooms.appendChild(span);
     }
+
+    async function uploadFile(file) {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/upload', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Error en la respuesta del servidor');
+      }
+
+      return response.json();
+    }
   </script>
+
 </body>
 
 </html>

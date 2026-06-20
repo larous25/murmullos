@@ -42,3 +42,6 @@ ehthumbs.db
 # Build artifacts
 build/
 .cache/
+
+pendiente.txt
+./uploads

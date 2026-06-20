@@ -21,3 +21,14 @@ This project demonstrates how to use Socket.IO events, namespaces, and rooms on 
 ## Purpose
 
 The main goal of this project is to serve as a learning example for understanding how Socket.IO works, including client-server communication, custom events, and room management.
+
+
+``` Mermaid
+graph TD;
+    A[Inicio] --> B{¿Es válido?};
+    B -- Sí --> C[Procesar];
+    B -- No --> D[Rechazar];
+    C --> E[Fin];
+    D --> E[Fin];
+
+```
