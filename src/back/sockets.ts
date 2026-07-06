@@ -1,5 +1,6 @@
 import { Server, Socket } from 'socket.io';
 
+let nextMessageId = 1;
 
 interface NewRoomData {
   newRoom: string;
@@ -12,11 +13,9 @@ interface ChangeRoomData {
 }
 
 interface MessagePayload {
+  id: number;
   userName: string;
-  msg?: string | undefined;
-  type?: 'text' | 'file' | undefined;
-  fileName?: string | undefined;
-  url?: string | undefined;
+  msg: string;
 }
 
 interface MessageData {
@@ -34,10 +33,11 @@ export const snsp = (serverIo: Server) => {
   const socketsNsp = serverIo.of('/chat');
 
   socketsNsp.on('connection', (socket: Socket) => {
-    // guardamos username en el socket
+
     socket.data.userName = 'anonymous';
 
-    socket.on('join', (data: { room: string; userName: string }) => {
+    socket.on('join', (data: { room: string; userName: string; lastMessageId?: number }) => {
+      console.log(`Usuario ${data.userName} se ha unido a la sala ${data.room}`);
       socket.data.userName = data.userName;
       socket.join(data.room);
 
@@ -45,9 +45,12 @@ export const snsp = (serverIo: Server) => {
         roomHistories[data.room] = [];
       }
 
+      const messages = (roomHistories[data.room] ?? [])
+        .filter(m => m.id > (data.lastMessageId ?? 0));
+
       socket.emit('history', {
         room: data.room,
-        messages: roomHistories[data.room]
+        messages
       });
     });
 
@@ -74,6 +77,7 @@ export const snsp = (serverIo: Server) => {
         messages: roomHistories[data.room]
       });
 
+    
       socket.to(data.room).emit('message', {
         userName: 'system',
         msg: `Welcome ${socket.data.userName} to ${data.room}`,
@@ -84,18 +88,16 @@ export const snsp = (serverIo: Server) => {
     // mensajes
     socket.on('message', (data: MessageData) => {
       const { room, message } = data;
-
+      console.log(`Mensaje recibido de ${socket.data.userName} en la sala ${room}:`);
       if (!roomHistories[room]) {
         roomHistories[room] = [];
       }
+      console.log(`Mensaje recibido en la sala ${room}:`, message);
 
-      // Ahora procesamos los datos dependiendo de si es texto o archivo
       const finalMessage: MessagePayload = {
+        id: nextMessageId++,
         userName: socket.data.userName,
-        type: message.type || 'text',
-        msg: message.msg,
-        fileName: message.fileName,
-        url: message.url
+        msg: message.msg
       };
 
       roomHistories[room].push(finalMessage);

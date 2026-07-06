@@ -21,7 +21,7 @@ body {
     display: flex;
     gap: 15px;
     width: 100%;
-    max-width: 800px;    
+    max-width: 800px;
     flex-direction: column;
     align-items: center;
 }
@@ -147,23 +147,35 @@ button#send {
 }
 
 .userInformation {
-  transition: all .4s ease;
-  overflow: hidden;
-}
-
-.userInformation {
+    transition: all .4s ease;
+    overflow: hidden;
     width: 100%;
     max-width: 800px;
     height: 60vh;
+    margin: auto;
+    display: grid;
+    place-items: center;
+}
 
+.userInformation .alertSpan {
+    margin-bottom: 10px;
+    width: 100%;
+    text-align: center;
+}
+
+.userInformation .alertSpan+div {
+    width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 10px;
+}
 
-    margin: auto;
-
-    transition: all .4s ease;
+.userInformation span {
+    color: rgb(172, 106, 7);
+    font-size: 14px;
+    margin-bottom: 5px;
+    display: block;
 }
 
 .userInformation input {
@@ -198,32 +210,36 @@ button {
 }
 
 .userInformation.hide {
-  opacity: 0;
-  transform: translateY(-20px);
-  max-height: 0;
-  margin: 0;
-  padding: 0;
+    opacity: 0;
+    transform: translateY(-20px);
+    max-height: 0;
+    margin: 0;
+    padding: 0;
 }
 
 .hide {
-  opacity: 0;
-  pointer-events: none;
-  visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
 }
 
 /* --- Añadir esto a su archivo CSS existente --- */
 
 /* Estilo para el contenedor .text cuando se está arrastrando un archivo encima */
 .chats .text.dragover textarea {
-    border: 2px dashed #4CAF50 !important; /* Borde verde discontinuo */
-    background-color: #e8f5e9; /* Fondo verde muy claro */
+    border: 2px dashed #4CAF50 !important;
+    /* Borde verde discontinuo */
+    background-color: #e8f5e9;
+    /* Fondo verde muy claro */
 }
 
 /* Estilo para el contenedor .text cuando se está subiendo un archivo */
 .chats .text.loading {
     position: relative;
-    opacity: 0.6; /* Hace la zona un poco transparente */
-    pointer-events: none; /* Evita que el usuario haga clic o escriba */
+    opacity: 0.6;
+    
+    pointer-events: none;
+    
 }
 
 /* Opcional: Añadir un texto de "Cargando..." superpuesto */

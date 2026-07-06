@@ -37,15 +37,20 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir);
 }
 
-const upload = multer({
-  dest: uploadDir
+const storage = multer.diskStorage({
+  destination: uploadDir,
+  filename: (_req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  }
 });
+
+const upload = multer({ storage });
 
 /* static files */
 app.use(serve(path.join(__dirname, '../front')));
 app.use(serve(path.join(__dirname, '../front/static')));
 
-// AÑADIR ESTAS DOS LÍNEAS
+
 app.use(router.routes());
 app.use(router.allowedMethods());
 
@@ -69,6 +74,27 @@ router.post(
     };
   }
 );
+
+router.get('/uploads/:filename', async (ctx) => {
+  const filename = ctx.params.filename;
+  console.log(`Solicitud de descarga para el archivo: ${filename}`);
+  if(!filename) {
+    ctx.status = 400;
+    ctx.body = 'Nombre de archivo no proporcionado';
+    return;
+  }
+
+  const filePath = path.join(__dirname, '../../uploads', filename);
+  console.log(`Ruta del archivo: ${filePath}`);
+  if (!fs.existsSync(filePath)) {
+    ctx.status = 404;
+    ctx.body = 'Archivo no encontrado';
+    return;
+  }
+
+  ctx.attachment(filename); // Fuerza la descarga
+  ctx.body = fs.createReadStream(filePath);
+});
 
 /* servidor http */
 const server = http.createServer(app.callback());
