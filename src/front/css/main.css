@@ -49,12 +49,13 @@ div.main {
     gap: 8px;
 }
 
-div.main span.msg {
+div.main .msg {
     background: #f0f4f8;
     padding: 8px 12px;
     border-radius: var(--border-radius);
     color: var(--text-main);
     word-break: break-word;
+    
 }
 
 /* Panel Lateral (Salas / Tabs) */
@@ -80,7 +81,7 @@ div.allrooms {
     border: 1px solid #e0e0e0;
 }
 
-div.allrooms span.msg {
+div.allrooms .msg {
     display: block;
     cursor: pointer;
     padding: 8px 10px;
@@ -89,11 +90,11 @@ div.allrooms span.msg {
     transition: background 0.2s ease;
 }
 
-div.allrooms span.msg:hover {
+div.allrooms .msg:hover {
     background: #e9ecef;
 }
 
-div.allrooms span.msg.active {
+div.allrooms .msg.active {
     background: var(--primary);
     color: white;
     font-weight: bold;
